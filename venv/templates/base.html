@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SharedTask - チームタスク管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script>
+        tailwind.config = {
+            content: ["./**/*.html"],
+            theme: { extend: {} }
+        }
+    </script>
+</head>
+<body class="bg-base-100 text-base-content min-h-screen">
+    <div class="navbar bg-base-200 shadow">
+        <div class="flex-1">
+            <a href="{{ url_for('tasks') }}" class="btn btn-ghost text-2xl font-bold">SharedTask</a>
+        </div>
+        <div class="flex-none gap-4">
+            <span class="text-sm">{{ current_user.username }} さん</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-error btn-sm">ログアウト</a>
+        </div>
+    </div>
+
+    <div class="container mx-auto max-w-6xl p-6">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-info shadow-lg mb-6">
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

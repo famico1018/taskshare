@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 class="text-4xl font-bold mb-8">チーム共有タスク</h1>
+
+<!-- タスク作成ボタン -->
+<button onclick="document.getElementById('create_modal').showModal()" 
+        class="btn btn-primary mb-8">+ 新しいタスクを作成</button>
+
+<!-- タスク一覧 -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for item in tasks %}
+    {% set task = item.task %}
+    {% set progress = item.progress %}
+    <div class="card bg-base-200 shadow-xl {% if task.deadline < now %} border-2 border-red-500 {% endif %}">
+        <div class="card-body">
+            <div class="flex justify-between items-start">
+                <h2 class="card-title">{{ task.title }}</h2>
+                <div class="badge {% if (task.deadline - now).days <= 1 %}badge-error{% elif (task.deadline - now).days <= 3 %}badge-warning{% else %}badge-neutral{% endif %}">
+                    {{ task.deadline.strftime('%m/%d %H:%M') }}
+                </div>
+            </div>
+            
+            <p class="text-sm text-base-content/70 line-clamp-2">{{ task.description or '説明なし' }}</p>
+
+            <!-- 自分の進捗 -->
+            <div class="mt-4">
+                <p class="text-sm font-medium">あなたの進捗</p>
+                <form method="POST" action="{{ url_for('update_progress', task_id=task.id) }}">
+                    <select name="status" onchange="this.form.submit()" class="select select-bordered w-full">
+                        <option value="todo" {% if progress.status == 'todo' %}selected{% endif %}>未着手</option>
+                        <option value="inprogress" {% if progress.status == 'inprogress' %}selected{% endif %}>進行中</option>
+                        <option value="done" {% if progress.status == 'done' %}selected{% endif %}>完了</option>
+                    </select>
+                    
+                    <textarea name="notes" class="textarea textarea-bordered w-full mt-3 h-20" 
+                              placeholder="メモを入力...">{{ progress.notes or '' }}</textarea>
+                    
+                    <button type="submit" class="btn btn-sm btn-outline mt-3 w-full">進捗を保存</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- タスク作成モーダル -->
+<dialog id="create_modal" class="modal">
+    <div class="modal-box">
+        <h3 class="font-bold text-2xl mb-6">新しいタスクを作成</h3>
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"> <!-- 必要なら追加 -->
+            <div class="form-control">
+                <label class="label">タスク名</label>
+                <input type="text" name="title" class="input input-bordered" required>
+            </div>
+            <div class="form-control mt-4">
+                <label class="label">説明</label>
+                <textarea name="description" class="textarea textarea-bordered"></textarea>
+            </div>
+            <div class="form-control mt-4">
+                <label class="label">提出期限</label>
+                <input type="datetime-local" name="deadline" class="input input-bordered" required>
+            </div>
+            <div class="modal-action">
+                <button type="button" onclick="document.getElementById('create_modal').close()" 
+                        class="btn">キャンセル</button>
+                <button type="submit" class="btn btn-primary">タスクを作成</button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+{% endblock %}
